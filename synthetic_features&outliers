@@ -162,3 +162,32 @@ calibration_data = train_model(
     steps=500,
     batch_size=5,
     input_feature="rooms_per_person")    
+
+
+# 이상점 식별, scatter로 산포도 측정
+plt.figure(figsize=(15, 6))
+plt.subplot(1, 2, 1)
+plt.scatter(calibration_data["predictions"], calibration_data["targets"])
+
+# 대부분의 산포점이 직선을 이룬다.선에서 벗어난 점에 집중해야 한다.
+# 히스토그램을 그리면 몇 개의 아웃라이어들을 발견할 수 있다.
+plt.subplot(1, 2, 2)
+_ = california_housing_dataframe["rooms_per_person"].hist()
+
+# 이상점 값을 적당한 최소 또는 최대로 설정하여 적합성을 높인다
+# 히스토그램 대부분 값이 5 미만이기 때문에 5에서 잘라내고 다시 확인
+california_housing_dataframe["rooms_per_person"] = (
+    california_housing_dataframe["rooms_per_person"]).apply(lambda x: min(x, 5))
+
+_ = california_housing_dataframe["rooms_per_person"].hist()
+
+# 학습을 다시하고 보정 결과를 출력
+calibration_data = train_model(
+    learning_rate=0.05,
+    steps=500,
+    batch_size=5,
+    input_feature="rooms_per_person")
+    
+# 산포도 확인
+_ = plt.scatter(calibration_data["predictions"], calibration_data["targets"])
+    
